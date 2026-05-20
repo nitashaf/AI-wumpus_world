@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Stack;
+import javax.swing.SwingUtilities;
 
 
 //This class is acting as Knowledge base agent, or reactive agent by using the functions and properties
@@ -608,7 +609,79 @@ public class Driver {
         }
     }
 
+    public static class SolveResult {
+        public final boolean solved;
+        public final Agent agent;
+        public final CaveReader cave;
+        public final boolean[][] visited;
+        public final boolean reactive;
+
+        SolveResult(boolean solved, Agent agent, CaveReader cave, boolean[][] visited, boolean reactive) {
+            this.solved = solved;
+            this.agent = agent;
+            this.cave = cave;
+            this.visited = visited;
+            this.reactive = reactive;
+        }
+    }
+
+    public static SolveResult runKnowledgeSolver(String caveName) {
+        resetState();
+        CaveReader c1 = new CaveReader();
+        c1.loadCave(caveName);
+        CaveSize = c1.caveSize;
+        KB = new KnowlegeBase(CaveSize);
+        agent = new Agent(c1);
+        stack1.push(0);
+        stack1.push(0);
+        boolean solved = solveWumpus();
+        return new SolveResult(solved, agent, c1, copyVisited(KB.Visited), false);
+    }
+
+    public static SolveResult runReactiveSolver(String caveName) {
+        resetState();
+        CaveReader c1 = new CaveReader();
+        c1.loadCave(caveName);
+        CaveSize = c1.caveSize;
+        Lfrontier = new boolean[CaveSize][CaveSize];
+        LVisited = new boolean[CaveSize][CaveSize];
+        totalSafeSpaces = c1.numSafeSpace;
+        agentR = new Agent(c1);
+        stack1.push(0);
+        stack1.push(0);
+        updatelocalFrontier(0, 0);
+        boolean solved = solveWumpusReactive();
+        return new SolveResult(solved, agentR, c1, copyVisited(LVisited), true);
+    }
+
+    private static void resetState() {
+        stack1.clear();
+        agent = null;
+        agentR = null;
+        KB = null;
+        CaveSize = 0;
+        totalSafeSpaces = 0;
+        Lfrontier = null;
+        LVisited = null;
+        LnoVisited = 0;
+    }
+
+    private static boolean[][] copyVisited(boolean[][] src) {
+        if (src == null) {
+            return null;
+        }
+        boolean[][] copy = new boolean[src.length][src[0].length];
+        for (int i = 0; i < src.length; i++) {
+            System.arraycopy(src[i], 0, copy[i], 0, src[i].length);
+        }
+        return copy;
+    }
+
     public static void main(String[] args) {
+        if (args.length == 0 || args[0].equals("--gui")) {
+            SwingUtilities.invokeLater(() -> new WumpusWorldGUI().setVisible(true));
+            return;
+        }
         int[][] expMoves;
 
         CaveReader c1 = new CaveReader();

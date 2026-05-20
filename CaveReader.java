@@ -21,7 +21,7 @@ public class CaveReader{
     }
     public void loadCave(String caveName){
         try{
-            File file = new File("C:\\Users\\nitas\\Downloads\\Caves/" + caveName + ".cave");//Selects desired File
+            File file = new File("Caves/" + caveName + ".cave");
             Scanner read = new Scanner(file);
             String[] line1 = read.nextLine().split(",");
             for(int i = 0; i< line1.length ; i++){

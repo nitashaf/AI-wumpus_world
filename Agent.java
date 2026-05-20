@@ -1,6 +1,8 @@
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Agent {
 
@@ -14,6 +16,8 @@ public class Agent {
     int currCol;
     int numArrows;
     boolean[] percepts;
+    /** Row/col pairs recorded for GUI replay after a solve run. */
+    public final List<int[]> movementHistory = new ArrayList<>();
 
     //TODO make a movelist? maybe holds strings then decodes to run methods.
 
@@ -65,8 +69,17 @@ public class Agent {
     }
     //Start agent in bottom left corner
     public void initializeAgent(){
+        movementHistory.clear();
+        movementHistory.add(new int[]{currRow, currCol});
         Room start = cave.getRoom(currRow, currCol);
         start.agentHere();
+    }
+
+    private void recordPosition() {
+        int[] last = movementHistory.isEmpty() ? null : movementHistory.get(movementHistory.size() - 1);
+        if (last == null || last[0] != currRow || last[1] != currCol) {
+            movementHistory.add(new int[]{currRow, currCol});
+        }
     }
     //Method to move agent and update location in cave. Checks if wall is hit when moving then remains in place
     //TODO make sure agent percieves a bump and remains in square if it tries to move outside the bounds of the cave
@@ -112,6 +125,7 @@ public class Agent {
 
             return false;
         }
+        recordPosition();
         return true;
 
 
